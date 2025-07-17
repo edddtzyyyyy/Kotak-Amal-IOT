@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoring Kotak Amal Pintar</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "ganti_dengan_api_key_anda",
+      authDomain: "ganti_dengan_auth_domain_anda",
+      databaseURL: "ganti_dengan_database_url_anda",
+      projectId: "ganti_dengan_project_id_anda",
+      storageBucket: "ganti_dengan_storage_bucket_anda",
+      messagingSenderId: "ganti_dengan_sender_id_anda",
+      appId: "ganti_dengan_app_id_anda"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const formatRupiah = (angka) => {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
+    };
+
+    // Update saldo
+    const updateSaldo = () => {
+      const saldoRef = ref(db, "saldo");
+      onValue(saldoRef, (snapshot) => {
+        const data = snapshot.val();
+        document.getElementById("totalSaldo").textContent = formatRupiah(data.totalSaldo);
+        document.getElementById("totalUang").textContent = data.totalUangTerdeteksi + " uang";
+        document.getElementById("totalBenda").textContent = data.totalBendaAsing + " benda asing";
+      });
+    };
+
+    // Load grafik mingguan (dummy karena fokus contoh frontend)
+    const loadGrafik = () => {
+      const ctx = document.getElementById('grafikMingguan').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+          datasets: [{
+            label: 'Total Donasi',
+            data: [10000, 5000, 8000, 3000, 15000, 7000, 12000],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+          }]
+        }
+      });
+    };
+
+    updateSaldo();
+    loadGrafik();
+    setInterval(updateSaldo, 60000);
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Monitoring Kotak Amal Pintar</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center mb-6">
+      <div class="bg-blue-100 p-4 rounded shadow">
+        <p class="font-semibold">Total Saldo</p>
+        <p id="totalSaldo" class="text-lg font-bold">Loading...</p>
+      </div>
+      <div class="bg-green-100 p-4 rounded shadow">
+        <p class="font-semibold">Jumlah Uang</p>
+        <p id="totalUang" class="text-lg font-bold">Loading...</p>
+      </div>
+      <div class="bg-red-100 p-4 rounded shadow">
+        <p class="font-semibold">Benda Asing</p>
+        <p id="totalBenda" class="text-lg font-bold">Loading...</p>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Grafik Donasi Mingguan</h2>
+      <canvas id="grafikMingguan" height="200"></canvas>
+    </div>
+  </div>
+</body>
+</html>
